@@ -1,0 +1,118 @@
+{
+ "count": 1372,
+ "fully_in": 1037,
+ "area_ha": 1507.59,
+ "total_count": 8286,
+ "total_area_ha": 7628.04,
+ "excluded": "EOS2.7 Green Belt",
+ "by_type": [
+  {
+   "type": "ET",
+   "count": 69,
+   "fully_in": 34,
+   "area_ha": 430.22,
+   "total_count": 414,
+   "total_area_ha": 1977.48,
+   "pct_area": 21.8
+  },
+  {
+   "type": "EMS",
+   "count": 58,
+   "fully_in": 44,
+   "area_ha": 377.81,
+   "total_count": 375,
+   "total_area_ha": 893.14,
+   "pct_area": 42.3
+  },
+  {
+   "type": "EOS",
+   "count": 427,
+   "fully_in": 307,
+   "area_ha": 249.52,
+   "total_count": 2172,
+   "total_area_ha": 1507.78,
+   "pct_area": 16.5
+  },
+  {
+   "type": "ER",
+   "count": 260,
+   "fully_in": 215,
+   "area_ha": 167.25,
+   "total_count": 1027,
+   "total_area_ha": 818.81,
+   "pct_area": 20.4
+  },
+  {
+   "type": "EE",
+   "count": 183,
+   "fully_in": 150,
+   "area_ha": 75.79,
+   "total_count": 1604,
+   "total_area_ha": 940.18,
+   "pct_area": 8.1
+  },
+  {
+   "type": "EPU",
+   "count": 128,
+   "fully_in": 107,
+   "area_ha": 69.97,
+   "total_count": 855,
+   "total_area_ha": 530.7,
+   "pct_area": 13.2
+  },
+  {
+   "type": "EP",
+   "count": 21,
+   "fully_in": 5,
+   "area_ha": 42.91,
+   "total_count": 53,
+   "total_area_ha": 143.01,
+   "pct_area": 30.0
+  },
+  {
+   "type": "ESA",
+   "count": 110,
+   "fully_in": 82,
+   "area_ha": 37.28,
+   "total_count": 853,
+   "total_area_ha": 361.71,
+   "pct_area": 10.3
+  },
+  {
+   "type": "EO",
+   "count": 42,
+   "fully_in": 35,
+   "area_ha": 28.88,
+   "total_count": 258,
+   "total_area_ha": 157.52,
+   "pct_area": 18.3
+  },
+  {
+   "type": "EH",
+   "count": 61,
+   "fully_in": 49,
+   "area_ha": 23.97,
+   "total_count": 471,
+   "total_area_ha": 272.34,
+   "pct_area": 8.8
+  },
+  {
+   "type": "L_RG",
+   "count": 12,
+   "fully_in": 9,
+   "area_ha": 3.98,
+   "total_count": 72,
+   "total_area_ha": 17.7,
+   "pct_area": 22.5
+  },
+  {
+   "type": "EAM",
+   "count": 1,
+   "fully_in": 0,
+   "area_ha": 0.01,
+   "total_count": 132,
+   "total_area_ha": 7.68,
+   "pct_area": 0.1
+  }
+ ]
+}
