@@ -1,10 +1,29 @@
 import { useEffect, useState } from 'react'
-import { HAZARD_STATS, publicUseLabel, type HazardStatsDef, type Highlight, ZONE_COMPARE_STATS } from './layers'
+import { HAZARD_STATS, statsType, statsTypeLabel, type HazardStatsDef, type Highlight, ZONE_COMPARE_STATS, FLOODING_STATS } from './layers'
 
 type TypeStats = { type: string; count: number; fully_in: number; area_ha: number; total_count: number; total_area_ha: number; pct_area: number }
 type Stats = { excluded?: string; count: number; fully_in: number; area_ha: number; total_count: number; total_area_ha: number; by_type: TypeStats[] }
 
 const pct = (a: number, b: number) => (b ? ((100 * a) / b).toFixed(1) : '0')
+
+// Sums rows that statsType joins (e.g. EP into EPU, L_RG into EOS), largest area first.
+function mergeTypes(layer: HazardStatsDef['id'], rows: TypeStats[]): TypeStats[] {
+  const out = new Map<string, TypeStats>()
+  for (const r of rows) {
+    const type = statsType(layer, r.type)
+    const m = out.get(type)
+    if (!m) out.set(type, { ...r, type })
+    else {
+      m.count += r.count
+      m.fully_in += r.fully_in
+      m.area_ha += r.area_ha
+      m.total_count += r.total_count
+      m.total_area_ha += r.total_area_ha
+      m.pct_area = +pct(m.area_ha, m.total_area_ha)
+    }
+  }
+  return [...out.values()].sort((a, b) => b.area_ha - a.area_ha)
+}
 
 type Props = { selected: Highlight | null; onSelect: (h: Highlight | null) => void }
 
@@ -13,7 +32,63 @@ export default function HazardStats(props: Props) {
   return (
     <div className="hazard-stats-stack">
       {HAZARD_STATS.map((def) => <StatsCard key={def.id} def={def} {...props} />)}
+      <FloodingCard />
       <ZoneCompareCard />
+    </div>
+  )
+}
+
+type FloodRow = { type: string; count: number; total_count: number; area_ha: number; total_area_ha: number; population: number }
+type FloodStats = Omit<FloodRow, 'type'> & { by_type: FloodRow[]; by_ward: FloodRow[] }
+
+// MCGM flooding spots touching the at-risk area (work/scripts/flooding_hazard_stats.py).
+function FloodingCard() {
+  const [stats, setStats] = useState<FloodStats | null>(null)
+  const [open, setOpen] = useState(false)
+  useEffect(() => {
+    fetch(FLOODING_STATS)
+      .then((r) => (r.ok ? r.json() : null))
+      .then(setStats)
+      .catch(() => setStats(null))
+  }, [])
+  if (!stats) return null
+  const rows = (title: string, rs: FloodRow[]) => (
+    <>
+      <tr><th colSpan={4} className="hazard-stats-sub">{title}</th></tr>
+      {rs.map((r) => (
+        <tr key={title + r.type}>
+          <th>{r.type}</th>
+          <td>{r.count} / {r.total_count}</td>
+          <td>{r.area_ha.toFixed(1)} ha</td>
+          <td>{r.population.toLocaleString()}</td>
+        </tr>
+      ))}
+    </>
+  )
+  return (
+    <div className="hazard-stats">
+      <button className="hazard-stats-head" onClick={() => setOpen(!open)}>
+        Flooding spots in hazard zone {open ? '▾' : '▸'}
+      </button>
+      <div className="hazard-stats-total">
+        <b>{stats.count}</b> of {stats.total_count} spots ({pct(stats.count, stats.total_count)}%)
+        <br />
+        <b>{stats.area_ha.toFixed(0)} ha</b> of {stats.total_area_ha.toFixed(0)} ha in hazard, ~{stats.population.toLocaleString()} people affected
+      </div>
+      {open && (
+        <>
+          <table className="props">
+            <thead>
+              <tr><th></th><th>Spots</th><th>Area in hazard</th><th>People</th></tr>
+            </thead>
+            <tbody>
+              {rows('By type', stats.by_type)}
+              {rows('By ward', stats.by_ward)}
+            </tbody>
+          </table>
+          <div className="hazard-stats-note">A spot counts if it touches the at-risk area. People = MCGM's affected-population figure per spot.</div>
+        </>
+      )}
     </div>
   )
 }
@@ -46,13 +121,13 @@ function StatsCard({ def, selected, onSelect }: Props & { def: HazardStatsDef })
             <tr><th>Type</th><th>Parcels</th><th>Area in hazard</th><th>% of type</th></tr>
           </thead>
           <tbody>
-            {stats.by_type.map((t) => (
+            {mergeTypes(def.id, stats.by_type).map((t) => (
               <tr
                 key={t.type}
                 className={isSel(t.type) ? 'selected' : undefined}
                 onClick={() => onSelect(isSel(t.type) ? null : { layer: def.id, type: t.type })}
               >
-                <th>{t.type} · {publicUseLabel(t.type)}</th>
+                <th>{statsTypeLabel(def.id, t.type)}</th>
                 <td>{t.count} / {t.total_count}</td>
                 <td>{t.area_ha.toFixed(1)} ha</td>
                 <td>{t.pct_area}%</td>

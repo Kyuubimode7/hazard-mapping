@@ -1,0 +1,171 @@
+{
+ "count": 147,
+ "total_count": 936,
+ "area_ha": 142.21,
+ "total_area_ha": 1532.42,
+ "population": 42477,
+ "by_type": [
+  {
+   "type": "Flooding spot",
+   "count": 125,
+   "total_count": 831,
+   "area_ha": 80.01,
+   "total_area_ha": 923.1,
+   "population": 35883
+  },
+  {
+   "type": "Chronic flooding spot",
+   "count": 22,
+   "total_count": 105,
+   "area_ha": 62.19,
+   "total_area_ha": 609.31,
+   "population": 6594
+  }
+ ],
+ "by_ward": [
+  {
+   "type": "K/W",
+   "count": 35,
+   "total_count": 75,
+   "area_ha": 24.06,
+   "total_area_ha": 80.39,
+   "population": 3144
+  },
+  {
+   "type": "H/E",
+   "count": 18,
+   "total_count": 53,
+   "area_ha": 4.62,
+   "total_area_ha": 40.28,
+   "population": 0
+  },
+  {
+   "type": "H/W",
+   "count": 17,
+   "total_count": 65,
+   "area_ha": 4.25,
+   "total_area_ha": 40.51,
+   "population": 4673
+  },
+  {
+   "type": "P/S",
+   "count": 11,
+   "total_count": 33,
+   "area_ha": 19.08,
+   "total_area_ha": 70.47,
+   "population": 3700
+  },
+  {
+   "type": "F/N",
+   "count": 10,
+   "total_count": 62,
+   "area_ha": 2.1,
+   "total_area_ha": 57.57,
+   "population": 4930
+  },
+  {
+   "type": "M/W",
+   "count": 10,
+   "total_count": 51,
+   "area_ha": 0.96,
+   "total_area_ha": 63.23,
+   "population": 4710
+  },
+  {
+   "type": "N",
+   "count": 10,
+   "total_count": 32,
+   "area_ha": 37.47,
+   "total_area_ha": 149.72,
+   "population": 3880
+  },
+  {
+   "type": "R/N",
+   "count": 9,
+   "total_count": 25,
+   "area_ha": 16.86,
+   "total_area_ha": 53.51,
+   "population": 1980
+  },
+  {
+   "type": "A",
+   "count": 4,
+   "total_count": 21,
+   "area_ha": 0.14,
+   "total_area_ha": 2.52,
+   "population": 6500
+  },
+  {
+   "type": "M/E",
+   "count": 4,
+   "total_count": 43,
+   "area_ha": 4.51,
+   "total_area_ha": 78.67,
+   "population": 0
+  },
+  {
+   "type": "L",
+   "count": 4,
+   "total_count": 64,
+   "area_ha": 16.9,
+   "total_area_ha": 207.09,
+   "population": 300
+  },
+  {
+   "type": "P/N",
+   "count": 4,
+   "total_count": 33,
+   "area_ha": 5.1,
+   "total_area_ha": 155.93,
+   "population": 760
+  },
+  {
+   "type": "R/C",
+   "count": 3,
+   "total_count": 31,
+   "area_ha": 0.27,
+   "total_area_ha": 24.65,
+   "population": 0
+  },
+  {
+   "type": "G/S",
+   "count": 3,
+   "total_count": 37,
+   "area_ha": 0.16,
+   "total_area_ha": 6.35,
+   "population": 5800
+  },
+  {
+   "type": "F/S",
+   "count": 2,
+   "total_count": 34,
+   "area_ha": 3.1,
+   "total_area_ha": 44.97,
+   "population": 900
+  },
+  {
+   "type": "S",
+   "count": 1,
+   "total_count": 43,
+   "area_ha": 0.04,
+   "total_area_ha": 123.18,
+   "population": 0
+  },
+  {
+   "type": "R/S",
+   "count": 1,
+   "total_count": 25,
+   "area_ha": 2.59,
+   "total_area_ha": 107.69,
+   "population": 1200
+  },
+  {
+   "type": "B",
+   "count": 1,
+   "total_count": 17,
+   "area_ha": 0.02,
+   "total_area_ha": 2.35,
+   "population": 0
+  }
+ ]
+}

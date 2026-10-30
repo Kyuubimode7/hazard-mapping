@@ -1,9 +1,9 @@
 import { useEffect, useState } from 'react'
 import { GeoJSON, MapContainer, Pane, TileLayer, useMap } from 'react-leaflet'
 import type { Feature, FeatureCollection } from 'geojson'
-import { geoJSON, type Layer, type PathOptions } from 'leaflet'
+import { circleMarker, geoJSON, type Layer, type PathOptions } from 'leaflet'
 import 'leaflet/dist/leaflet.css'
-import { BASEMAP, classOf, groupOf, GROUPS, HAZARD_STATS, type Highlight, type LayerDef } from './layers'
+import { BASEMAP, classOf, groupOf, GROUPS, HAZARD_STATS, statsType, type Highlight, type LayerDef } from './layers'
 import type { LoadState } from './App'
 
 const OTHER_COLOR = '#9e9e9e'
@@ -33,7 +33,9 @@ function styleFor(layer: LayerDef) {
   const colors = new Map(layer.classify?.classes.map((c) => [c.value, c.color]))
   return (feature?: Feature): PathOptions => {
     const color = layer.classify ? (colors.get(classOf(layer, feature?.properties ?? null)) ?? OTHER_COLOR) : layer.color
-    return layer.kind === 'line'
+    return layer.kind === 'point'
+      ? { color: '#000', weight: 1, fillColor: color, fillOpacity: 0.9 }
+      : layer.kind === 'line'
       ? { color, weight: layer.weight ?? 2, dashArray: layer.dash }
       : layer.outline
         ? { color, weight: layer.weight ?? 1.5, dashArray: layer.dash, fill: false }
@@ -95,7 +97,7 @@ function HazardHighlight({ highlight }: { highlight: Highlight }) {
     type: 'FeatureCollection',
     features: data.features.filter(
       (f) =>
-        f.properties?.[def.typeField] === highlight.type &&
+        statsType(def.id, String(f.properties?.[def.typeField] ?? '')) === highlight.type &&
         !String(f.properties?.[def.codeField] ?? '').replace(/ /g, '').startsWith(def.greenBelt),
     ),
   }
@@ -153,6 +155,7 @@ export default function MapView({ layers, loaded, hidden, opacity, highlight }: 
             pane={groupOf(layer.id)}
             style={styleFor(layer)}
             filter={(f) => !off.includes(classOf(layer, f.properties))}
+            pointToLayer={(_, latlng) => circleMarker(latlng, { radius: 5, pane: groupOf(layer.id) })}
             onEachFeature={popup(layer)}
           />
         )

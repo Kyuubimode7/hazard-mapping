@@ -5,7 +5,7 @@ export type LayerDef = {
   name: string
   url: string
   color: string
-  kind: 'line' | 'polygon'
+  kind: 'line' | 'polygon' | 'point'
   weight?: number
   dash?: string
   // Fill polygons with diagonal hatching in the class colour instead of a solid fill.
@@ -36,9 +36,11 @@ const CRZ11 = DATA + 'CRZ_Notification_2011/vectors_NCSCM/'
 const DERIVED =DATA + 'derived/'
 const HZ = DERIVED + 'mcgm_dp_hazard/'
 const HZ11_DIR = DERIVED + 'crz2011/'
+const MGH = DATA + 'mcgm_gis_hazard_vectors/mcgm_gis_hazard_vectors/'
 const CMP = DERIVED + 'crz_compare/'
 const CHG = DERIVED + 'crz_changes/'
 export const ZONE_COMPARE_STATS = CMP + 'zone_compare_stats.json'
+export const FLOODING_STATS = DERIVED + 'flooding_hazard_stats.json'
 
 const zoneClasses: ClassDef[] = [
   { value: 'R', label: 'Residential', color: '#f2d43a' },
@@ -68,6 +70,7 @@ const publicUse: [string, string, string][] = [
 
 // 'ROS' / 'EOS' → 'Open Space'
 export function publicUseLabel(code: string): string {
+  if (code === 'L_RG') return 'Layout Recreation Ground'
   return publicUse.find(([c]) => code.slice(1) === c)?.[1] ?? code
 }
 
@@ -364,6 +367,27 @@ export const GROUPS: Group[] = [
       },
     ],
   },
+  {
+    id: 'mcgmhz',
+    title: 'MCGM Hazard & Drainage',
+    sections: [
+      {
+        title: 'Flooding',
+        layers: [
+          { id: 'flood', name: 'Flooding Spots', url: MGH + '344_Flooding_Spots.geojson', color: '#e53935', kind: 'polygon' },
+          { id: 'flowsensor', name: 'Flow Level Sensors', url: MGH + '345_Flow_Level_Sensor.geojson', color: '#ffeb3b', kind: 'point' },
+        ],
+      },
+      {
+        title: 'Drainage',
+        layers: [
+          { id: 'swd', name: 'Storm Water Drains', url: MGH + '07_Storm_Water_Drains.geojson', color: '#4fc3f7', kind: 'line', weight: 1 },
+          { id: 'nala', name: 'Nalas & Others', url: MGH + '153_Nala_and_Others.geojson', color: '#0288d1', kind: 'line', weight: 2.5 },
+          { id: 'pumpstn', name: 'Pumping Stations', url: MGH + '09_Pumping_Stn.geojson', color: '#ff7043', kind: 'point' },
+        ],
+      },
+    ],
+  },
 ]
 
 function hazardPopup(p: Record<string, unknown>): string {
@@ -396,6 +420,19 @@ function hazardStats(dir: string): HazardStatsDef[] {
   ]
 }
 export const HAZARD_STATS: HazardStatsDef[] = hazardStats(DERIVED)
+// Types shown as one row in the stats cards (and highlighted together): code → row it joins.
+// L_RG (layout recreation ground) joins the open-space row of each layer.
+const STATS_MERGE: Record<HazardStatsDef['id'], Record<string, string>> = {
+  des: { EP: 'EPU', ESA: 'EAM', L_RG: 'EOS' },
+  res: { L_RG: 'ROS', Metro: 'RT', RSA: 'RAM', RP: 'RPU' },
+}
+export const statsType = (layer: HazardStatsDef['id'], t: string) => STATS_MERGE[layer][t] ?? t
+// 'EPU' → 'EPU + EP · Public Utilities / Police / Public Safety'
+export function statsTypeLabel(layer: HazardStatsDef['id'], t: string): string {
+  const merge = STATS_MERGE[layer]
+  const codes = [t, ...Object.keys(merge).filter((k) => merge[k] === t)]
+  return `${codes.join(' + ')} · ${codes.map(publicUseLabel).join(' / ')}`
+}
 export type Highlight = { layer: HazardStatsDef['id']; type: string }
 
 export function classOf(layer: LayerDef, props: Record<string, unknown> | null): string {

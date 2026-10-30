@@ -33,6 +33,7 @@ data/**
 !data/derived/crz2011/taluk_hazard_faces.geojson
 !data/derived/crz_changes/*.geojson
 !data/derived/crz_compare/zone_compare_stats.json
+!data/derived/flooding_hazard_stats.json
 !data/derived/mcgm_designations_hazard_stats.json
 !data/derived/mcgm_dp_hazard/00_REVISED_PLU_ZONES_in.geojson
 !data/derived/mcgm_dp_hazard/00_REVISED_PLU_ZONES_out.geojson
@@ -53,6 +54,11 @@ data/**
 !data/mcgm_dp2034_vectors/mcgm_dp2034_vectors/1544_SPA_Landuse_zones.geojson
 !data/mcgm_dp2034_vectors/mcgm_dp2034_vectors/46_PLU_RESERVATION.geojson
 !data/mcgm_dp2034_vectors/mcgm_dp2034_vectors/47_PLU_DESIGNATION.geojson
+!data/mcgm_gis_hazard_vectors/mcgm_gis_hazard_vectors/07_Storm_Water_Drains.geojson
+!data/mcgm_gis_hazard_vectors/mcgm_gis_hazard_vectors/09_Pumping_Stn.geojson
+!data/mcgm_gis_hazard_vectors/mcgm_gis_hazard_vectors/153_Nala_and_Others.geojson
+!data/mcgm_gis_hazard_vectors/mcgm_gis_hazard_vectors/344_Flooding_Spots.geojson
+!data/mcgm_gis_hazard_vectors/mcgm_gis_hazard_vectors/345_Flow_Level_Sensor.geojson
 !data/midc_vectors/midc_vectors/05_Plot_Boundary.geojson
 !data/midc_vectors/midc_vectors/06_MIDC_Boundary.geojson
 

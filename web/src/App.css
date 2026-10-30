@@ -110,6 +110,10 @@
   border-radius: 2px;
 }
 
+.swatch.point {
+  border-radius: 50%;
+}
+
 .swatch.line {
   height: 3px;
 }
@@ -225,4 +229,9 @@
 
 .section-description {
   margin-left: 0;
+}
+
+.hazard-stats-sub {
+  padding-top: 6px;
+  font-weight: 600;
 }
