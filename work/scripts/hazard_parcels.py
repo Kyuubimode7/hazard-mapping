@@ -1,8 +1,11 @@
 """Split CZMP taluk polygons by the hazard line; flag the seaward faces as at risk.
 
-Output: data/derived/taluk_hazard_faces.geojson (EPSG:4326), props taluk, district, at_risk, area_ha.
+Usage: hazard_parcels.py [2019|2011]. 2011 uses the CRZ Notification 2011 (NCSCM) hazard line and HTL
+with the same CZMP 2019 taluks, so the two years compare like for like.
+Output: data/derived[/crz2011]/taluk_hazard_faces.geojson (EPSG:4326), props taluk, district, at_risk, area_ha.
 """
 import json
+import sys
 from pathlib import Path
 
 import numpy as np
@@ -12,13 +15,18 @@ import shapely.ops
 from shapely.ops import polygonize, unary_union
 
 ROOT = Path(__file__).resolve().parents[2]
+YEAR = sys.argv[1] if len(sys.argv) > 1 else "2019"
 SRC = ROOT / "data/czmp_2019_vectors/czmp_2019_vectors"
-OUT = ROOT / "data/derived"  # served to the web viewer at /data/derived/
+CRZ11 = ROOT / "data/CRZ_Notification_2011/vectors_NCSCM"
+# Hazard line and HTL files per year.
+LINES = {"2019": (SRC, "20_Hazard_Line.geojson", "18_High_Tide_Line.geojson"),
+         "2011": (CRZ11, "27_line_hazard.geojson", "25_line_HTL.geojson")}[YEAR]
+OUT = ROOT / "data/derived" / ("" if YEAR == "2019" else "crz" + YEAR)  # served to the web viewer at /data/derived/
 M2HA = 1e-4
 
 
-def load(name):
-    return json.load(open(SRC / name, encoding="utf-8"))["features"]
+def load(name, src=SRC):
+    return json.load(open(src / name, encoding="utf-8"))["features"]
 
 
 def area_ha(g):  # local equirectangular approximation at ~19 degN
@@ -33,10 +41,10 @@ box = shapely.box(*land.buffer(0.01).bounds)  # the hazard line runs far north; 
 
 
 def lines(name):
-    return unary_union([shapely.clip_by_rect(shape(f["geometry"]), *box.bounds) for f in load(name)])
+    return unary_union([shapely.clip_by_rect(shape(f["geometry"]), *box.bounds) for f in load(name, LINES[0])])
 
 
-hazard = lines("20_Hazard_Line.geojson")
+hazard = lines(LINES[1])
 
 
 def close_gaps(net, edge, tol=0.01):
@@ -65,7 +73,7 @@ def close_gaps(net, edge, tol=0.01):
 
 
 hazard = close_gaps(hazard, land.boundary)
-htl = lines("18_High_Tide_Line.geojson")
+htl = lines(LINES[2])
 
 # Node taluk boundaries with the hazard line and build every enclosed face.
 edges = unary_union([land.boundary, hazard] + [g.boundary for _, g in taluks])

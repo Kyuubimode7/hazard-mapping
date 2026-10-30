@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { HAZARD_STATS, publicUseLabel, type HazardStatsDef, type Highlight } from './layers'
+import { HAZARD_STATS, publicUseLabel, type HazardStatsDef, type Highlight, ZONE_COMPARE_STATS } from './layers'
 
 type TypeStats = { type: string; count: number; fully_in: number; area_ha: number; total_count: number; total_area_ha: number; pct_area: number }
 type Stats = { excluded?: string; count: number; fully_in: number; area_ha: number; total_count: number; total_area_ha: number; by_type: TypeStats[] }
@@ -13,13 +13,14 @@ export default function HazardStats(props: Props) {
   return (
     <div className="hazard-stats-stack">
       {HAZARD_STATS.map((def) => <StatsCard key={def.id} def={def} {...props} />)}
+      <ZoneCompareCard />
     </div>
   )
 }
 
 function StatsCard({ def, selected, onSelect }: Props & { def: HazardStatsDef }) {
   const [stats, setStats] = useState<Stats | null>(null)
-  const [open, setOpen] = useState(true)
+  const [open, setOpen] = useState(false)
   useEffect(() => {
     fetch(def.stats)
       .then((r) => (r.ok ? r.json() : null))
@@ -59,6 +60,53 @@ function StatsCard({ def, selected, onSelect }: Props & { def: HazardStatsDef })
             ))}
           </tbody>
         </table>
+      )}
+    </div>
+  )
+}
+
+type ZoneRow = { id: string; zone: string; area_2019_ha: number | null; area_2011_ha: number | null; both_ha?: number; only_2019_ha?: number; only_2011_ha?: number }
+
+const fmt = (v: number | null | undefined) => (v == null ? '–' : v.toFixed(0))
+
+// Area of each CRZ zone in the 2011 and 2019 maps and how much of it overlaps (work/scripts/crz_zone_compare.py).
+function ZoneCompareCard() {
+  const [rows, setRows] = useState<ZoneRow[] | null>(null)
+  const [open, setOpen] = useState(false)
+  useEffect(() => {
+    fetch(ZONE_COMPARE_STATS)
+      .then((r) => (r.ok ? r.json() : null))
+      .then((d) => setRows(d?.zones ?? null))
+      .catch(() => setRows(null))
+  }, [])
+  if (!rows) return null
+  return (
+    <div className="hazard-stats zone-compare">
+      <button className="hazard-stats-head" onClick={() => setOpen(!open)}>
+        CRZ zones · 2011 vs 2019 {open ? '▾' : '▸'}
+      </button>
+      {open && (
+        <>
+          <table className="props">
+            <thead>
+              <tr><th>Zone</th><th>2011 ha</th><th>2019 ha</th><th>Added</th><th>Removed</th></tr>
+            </thead>
+            <tbody>
+              {rows.map((r) => (
+                <tr key={r.id}>
+                  <th>{r.zone}</th>
+                  <td>{fmt(r.area_2011_ha)}</td>
+                  <td>{fmt(r.area_2019_ha)}</td>
+                  <td>{fmt(r.only_2019_ha)}</td>
+                  <td>{fmt(r.only_2011_ha)}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+          <div className="hazard-stats-note">
+            Added = in 2019 only, removed = in 2011 only. Clipped to the study area. See the "CRZ changes" group for the map.
+          </div>
+        </>
       )}
     </div>
   )

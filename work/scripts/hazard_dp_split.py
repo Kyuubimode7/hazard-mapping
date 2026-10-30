@@ -6,9 +6,11 @@ Needs data/derived/taluk_hazard_faces.geojson from hazard_parcels.py. Writes to 
   taluk_hazard_faces.geojson  rewritten with reservation props per face (res_count, res_area_ha,
       res_pct = % of the face covered by reservations, res_breakdown)
   mcgm_{reservations,designations}_hazard_stats.json  totals and per-type figures for the viewer's stats panel
+Usage: hazard_dp_split.py [2019|2011]; 2011 reads and writes data/derived/crz2011/ instead.
 Areas are in UTM 43N (EPSG:32643).
 """
 import json
+import sys
 from pathlib import Path
 
 import shapely
@@ -18,7 +20,8 @@ from shapely.ops import transform, unary_union
 
 ROOT = Path(__file__).resolve().parents[2]
 DP = ROOT / "data/mcgm_dp2034_vectors/mcgm_dp2034_vectors"
-DER = ROOT / "data/derived"
+YEAR = sys.argv[1] if len(sys.argv) > 1 else "2019"
+DER = ROOT / "data/derived" / ("" if YEAR == "2019" else "crz" + YEAR)
 OUT = DER / "mcgm_dp_hazard"
 LAYERS = ["00_REVISED_PLU_ZONES", "46_PLU_RESERVATION", "47_PLU_DESIGNATION"]
 RES = "46_PLU_RESERVATION"

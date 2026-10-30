@@ -58,6 +58,7 @@ function GroupItem({ group, ...props }: Props & { group: Group }) {
         group.sections.map((s) => (
           <div key={s.title} className="section">
             <div className="section-title">{s.title}</div>
+            {s.description && <p className="description section-description">{s.description}</p>}
             {s.layers.map((l) => <LayerItem key={l.id} layer={l} {...props} />)}
           </div>
         ))}
@@ -98,6 +99,7 @@ function LayerItem({ layer, visible, hidden, loaded, setLayersVisible, toggleCla
         {state?.status === 'error' && <span className="badge err" title={state.message}>failed</span>}
         {state?.status === 'ready' && <span className="badge">{state.data.features.length}</span>}
       </div>
+      {layer.description && <p className="description">{layer.description}</p>}
       {open && (
         <ul className="classes">
           {classes.map((c) => (

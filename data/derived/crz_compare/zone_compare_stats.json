@@ -1,0 +1,77 @@
+{
+ "extent": "Bounding box of the CZMP 2019 taluks",
+ "zones": [
+  {
+   "id": "crz1a",
+   "zone": "CRZ IA",
+   "area_2019_ha": 18002.7,
+   "area_2011_ha": 19204.0,
+   "both_ha": 17245.4,
+   "only_2019_ha": 757.2,
+   "only_2011_ha": 1958.6
+  },
+  {
+   "id": "mbuf",
+   "zone": "50m Mangrove Buffer \u00b7 CRZ IA",
+   "area_2019_ha": 8898.2,
+   "area_2011_ha": 9874.1,
+   "both_ha": 8897.0,
+   "only_2019_ha": 1.2,
+   "only_2011_ha": 977.1
+  },
+  {
+   "id": "crz1b",
+   "zone": "CRZ IB",
+   "area_2019_ha": 15807.4,
+   "area_2011_ha": null
+  },
+  {
+   "id": "crz2",
+   "zone": "CRZ II",
+   "area_2019_ha": 5931.7,
+   "area_2011_ha": 8926.0,
+   "both_ha": 5696.1,
+   "only_2019_ha": 235.6,
+   "only_2011_ha": 3229.9
+  },
+  {
+   "id": "ndz",
+   "zone": "No Development Zone",
+   "area_2019_ha": 1654.4,
+   "area_2011_ha": 3159.0,
+   "both_ha": 1378.2,
+   "only_2019_ha": 276.2,
+   "only_2011_ha": 1780.8
+  },
+  {
+   "id": "crz3a",
+   "zone": "CRZ IIIA (50\u2013500m from HTL)",
+   "area_2019_ha": 338.1,
+   "area_2011_ha": null
+  },
+  {
+   "id": "z200500",
+   "zone": "200\u2013500m from HTL",
+   "area_2019_ha": null,
+   "area_2011_ha": 474.2
+  },
+  {
+   "id": "crz4b",
+   "zone": "CRZ IVB",
+   "area_2019_ha": 15609.1,
+   "area_2011_ha": 14893.8,
+   "both_ha": 14588.5,
+   "only_2019_ha": 1020.6,
+   "only_2011_ha": 305.2
+  },
+  {
+   "id": "crz4a",
+   "zone": "CRZ IVA",
+   "area_2019_ha": 71863.8,
+   "area_2011_ha": 63074.0,
+   "both_ha": 62824.3,
+   "only_2019_ha": 9052.1,
+   "only_2011_ha": 249.7
+  }
+ ]
+}

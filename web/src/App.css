@@ -1,7 +1,25 @@
 .app {
   display: grid;
-  grid-template-columns: 4fr 1fr;
   height: 100vh;
+}
+
+.sidenav-resizer {
+  position: fixed;
+  top: 0;
+  bottom: 0;
+  width: 6px;
+  z-index: 1100;
+  cursor: col-resize;
+}
+
+.sidenav-resizer:hover,
+.resizing .sidenav-resizer {
+  background: rgba(30, 100, 210, 0.35);
+}
+
+.resizing {
+  cursor: col-resize;
+  user-select: none;
 }
 
 .map {
@@ -191,4 +209,20 @@
 
 .hazard-stats tbody tr.selected {
   background: #fff59d;
+}
+
+.zone-compare {
+  border-left-color: #1a9641;
+  flex-shrink: 0;
+}
+
+.description {
+  margin: 0 0 4px 44px;
+  font-size: 11px;
+  line-height: 1.35;
+  color: #888;
+}
+
+.section-description {
+  margin-left: 0;
 }

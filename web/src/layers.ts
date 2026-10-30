@@ -14,11 +14,13 @@ export type LayerDef = {
   outline?: boolean
   // Split the layer into sublayers by this attribute. Values not listed fall into "Other".
   classify?: { field: string; classes: ClassDef[] }
+  // Short explanation shown under the layer name in the side panel.
+  description?: string
   // Custom popup HTML; the default lists every property.
   popup?: (props: Record<string, unknown>) => string
 }
 
-export type Section = { title: string; layers: LayerDef[] }
+export type Section = { title: string; description?: string; layers: LayerDef[] }
 export type Group = { id: string; title: string; sections: Section[] }
 
 export const OTHER = '__other'
@@ -30,8 +32,13 @@ const CZMP = DATA + 'czmp_2019_vectors/czmp_2019_vectors/'
 const DP = DATA + 'mcgm_dp2034_vectors/mcgm_dp2034_vectors/'
 const JNPA = DATA + 'jnpa_vectors/jnpa_vectors/'
 const MIDC = DATA + 'midc_vectors/midc_vectors/'
-const DERIVED = DATA + 'derived/'
+const CRZ11 = DATA + 'CRZ_Notification_2011/vectors_NCSCM/'
+const DERIVED =DATA + 'derived/'
 const HZ = DERIVED + 'mcgm_dp_hazard/'
+const HZ11_DIR = DERIVED + 'crz2011/'
+const CMP = DERIVED + 'crz_compare/'
+const CHG = DERIVED + 'crz_changes/'
+export const ZONE_COMPARE_STATS = CMP + 'zone_compare_stats.json'
 
 const zoneClasses: ClassDef[] = [
   { value: 'R', label: 'Residential', color: '#f2d43a' },
@@ -115,6 +122,48 @@ function mcgmLayers(idSuffix: string, base: string, fileSuffix: string): LayerDe
   ]
 }
 
+// Taluks split by the hazard line (work/scripts/hazard_parcels.py [year]).
+function hazardRiskLayer(id: string, dir: string): LayerDef {
+  return {
+    id, name: 'Land vs hazard line', url: dir + 'taluk_hazard_faces.geojson', color: '#999', kind: 'polygon',
+    popup: hazardPopup,
+    classify: {
+      field: 'at_risk',
+      classes: [
+        { value: 'true', label: 'At risk (seaward of hazard line)', color: '#d7301f' },
+        { value: 'false', label: 'Landward of hazard line', color: '#bdbdbd' },
+      ],
+    },
+  }
+}
+
+// What each CRZ zone means (CRZ Notifications 2011 and 2019); shown in the side panel.
+const ZONE_INFO = {
+  crz1a: 'Ecologically sensitive areas: mangroves, salt marshes, mudflats, sand dunes, turtle nesting and bird habitats. No new construction apart from a few permitted activities.',
+  mbuf: '50 m buffer around mangrove patches larger than 1,000 m². Treated as CRZ IA, so no construction.',
+  crz1b: 'The intertidal zone between the High Tide Line and the Low Tide Line. Separated from CRZ IA only in the 2019 notification.',
+  crz2: 'Developed land within municipal limits that is already substantially built up. Building is allowed on the landward side of existing roads or authorised structures, under local town-planning rules.',
+  ndz: 'No Development Zone in rural (CRZ III) areas, measured landward from the HTL: 200 m in 2011; 50 m (CRZ IIIA) or 200 m (CRZ IIIB) in 2019, and narrower along creeks. Only repairs, traditional uses and specified public works are allowed.',
+  crz3a: 'CRZ III land 50–500 m from the HTL in densely populated rural areas (2019 only). Development is allowed under local rules beyond the 50 m NDZ.',
+  z200500: 'CRZ III land 200–500 m from the HTL beyond the NDZ (2011 only). Limited development such as housing for local communities and tourism facilities is allowed.',
+  crz4a: 'Sea water and seabed from the Low Tide Line out to 12 nautical miles. Regulates fishing, dredging and coastal structures.',
+  crz4b: 'Water and bed of tidal water bodies (creeks, rivers, estuaries) from the LTL on one bank to the LTL on the other.',
+}
+
+// One zone's patches that grew (only in 2019) or reduced (only in 2011) (work/scripts/crz_changes.py).
+function zoneChangeLayer(id: keyof typeof ZONE_INFO, name: string): LayerDef {
+  return {
+    id: 'chg-' + id, name, description: ZONE_INFO[id], url: CHG + id + '.geojson', color: '#999', kind: 'polygon',
+    classify: {
+      field: 'change',
+      classes: [
+        { value: 'grew', label: 'Grew (2019 only)', color: '#1e64d2' },
+        { value: 'reduced', label: 'Reduced (2011 only)', color: '#d7191c' },
+      ],
+    },
+  }
+}
+
 export const GROUPS: Group[] = [
   {
     id: 'admin',
@@ -149,31 +198,66 @@ export const GROUPS: Group[] = [
       {
         title: 'Zones',
         layers: [
-          { id: 'crz1a', name: 'CRZ IA', url: CZMP + '25_CRZ_IA.geojson', color: '#2e7d32', kind: 'polygon' },
-          { id: 'mbuf', name: '50m Mangrove Buffer · CRZ IA', url: CZMP + '26_50m_Mangrove_Buffer_Zone_CRZ_IA.geojson', color: '#81c784', kind: 'polygon' },
-          { id: 'crz1b', name: 'CRZ IB', url: CZMP + '27_CRZ_IB.geojson', color: '#a1887f', kind: 'polygon' },
-          { id: 'crz2', name: 'CRZ II', url: CZMP + '28_CRZ_II.geojson', color: '#ffb300', kind: 'polygon' },
-          { id: 'ndz', name: 'No Development Zone', url: CZMP + '29_No_Development_Zone.geojson', color: '#e57373', kind: 'polygon' },
-          { id: 'crz3a', name: 'CRZ IIIA (50–500m from HTL)', url: CZMP + '30_50m_to_500m_from_HTL_CRZ_IIIA.geojson', color: '#ba68c8', kind: 'polygon' },
-          { id: 'crz4b', name: 'CRZ IVB', url: CZMP + '32_CRZ_IVB.geojson', color: '#4fc3f7', kind: 'polygon' },
-          { id: 'crz4a', name: 'CRZ IVA (up to 12 NM)', url: CZMP + '33_CRZ_IVA_Upto_12_NM.geojson', color: '#0277bd', kind: 'polygon' },
+          { id: 'crz1a', description: ZONE_INFO.crz1a, name: 'CRZ IA', url: CZMP + '25_CRZ_IA.geojson', color: '#2e7d32', kind: 'polygon' },
+          { id: 'mbuf', description: ZONE_INFO.mbuf, name: '50m Mangrove Buffer · CRZ IA', url: CZMP + '26_50m_Mangrove_Buffer_Zone_CRZ_IA.geojson', color: '#81c784', kind: 'polygon' },
+          { id: 'crz1b', description: ZONE_INFO.crz1b, name: 'CRZ IB', url: CZMP + '27_CRZ_IB.geojson', color: '#a1887f', kind: 'polygon' },
+          { id: 'crz2', description: ZONE_INFO.crz2, name: 'CRZ II', url: CZMP + '28_CRZ_II.geojson', color: '#ffb300', kind: 'polygon' },
+          { id: 'ndz', description: ZONE_INFO.ndz, name: 'No Development Zone', url: CZMP + '29_No_Development_Zone.geojson', color: '#e57373', kind: 'polygon' },
+          { id: 'crz3a', description: ZONE_INFO.crz3a, name: 'CRZ IIIA (50–500m from HTL)', url: CZMP + '30_50m_to_500m_from_HTL_CRZ_IIIA.geojson', color: '#ba68c8', kind: 'polygon' },
+          { id: 'crz4b', description: ZONE_INFO.crz4b, name: 'CRZ IVB', url: CZMP + '32_CRZ_IVB.geojson', color: '#4fc3f7', kind: 'polygon' },
+          { id: 'crz4a', description: ZONE_INFO.crz4a, name: 'CRZ IVA (up to 12 NM)', url: CZMP + '33_CRZ_IVA_Upto_12_NM.geojson', color: '#0277bd', kind: 'polygon' },
+        ],
+      },
+      { title: 'Hazard analysis', layers: [hazardRiskLayer('hazardrisk', DERIVED)] },
+    ],
+  },
+  {
+    // CRZ Notification 2011 maps (NCSCM), for comparison with CZMP 2019. Colours match the 2019 group.
+    id: 'crz11',
+    title: 'CRZ · 2011 (NCSCM)',
+    sections: [
+      {
+        title: 'Reference lines',
+        layers: [
+          { id: 'htl11', weight: 3, name: 'High Tide Line', url: CRZ11 + '25_line_HTL.geojson', color: '#d32f2f', kind: 'line' },
+          { id: 'ltl11', weight: 2, name: 'Low Tide Line', url: CRZ11 + '26_line_LTL.geojson', color: '#1976d2', kind: 'line' },
+          { id: 'hazard11', weight: 2.5, dash: '8 4', name: 'Hazard Line', url: CRZ11 + '27_line_hazard.geojson', color: '#f57c00', kind: 'line' },
+          { id: 'l100m11', weight: 1.5, dash: '4 3', name: '100m Line · CRZ III', url: CRZ11 + '28_line_100m_CRZIII.geojson', color: '#6a1b9a', kind: 'line' },
+          { id: 'crzb11', weight: 4, name: 'CRZ Boundary', url: CRZ11 + '29_line_CRZ_boundary.geojson', color: '#212121', kind: 'line' },
         ],
       },
       {
-        // Taluks split by the hazard line (work/scripts/hazard_parcels.py).
-        title: 'Hazard analysis',
+        title: 'Zones',
         layers: [
-          {
-            id: 'hazardrisk', name: 'Land vs hazard line', url: DERIVED + 'taluk_hazard_faces.geojson', color: '#999', kind: 'polygon',
-            popup: hazardPopup,
-            classify: {
-              field: 'at_risk',
-              classes: [
-                { value: 'true', label: 'At risk (seaward of hazard line)', color: '#d7301f' },
-                { value: 'false', label: 'Landward of hazard line', color: '#bdbdbd' },
-              ],
-            },
-          },
+          { id: 'crz1a11', description: ZONE_INFO.crz1a, name: 'CRZ IA', url: CRZ11 + '31_zone_CRZ_IA.geojson', color: '#2e7d32', kind: 'polygon' },
+          { id: 'mbuf11', description: ZONE_INFO.mbuf, name: '50m Mangrove Buffer · CRZ IA', url: CRZ11 + '32_zone_CRZ_IA_mangrove_buffer_50m.geojson', color: '#81c784', kind: 'polygon' },
+          { id: 'crz211', description: ZONE_INFO.crz2, name: 'CRZ II', url: CRZ11 + '34_zone_CRZ_II.geojson', color: '#ffb300', kind: 'polygon' },
+          { id: 'ndz11', description: ZONE_INFO.ndz, name: 'No Development Zone', url: CRZ11 + '35_zone_NDZ.geojson', color: '#e57373', kind: 'polygon' },
+          { id: 'z200500m11', description: ZONE_INFO.z200500, name: '200–500m from HTL', url: CRZ11 + '36_zone_200_500m_from_HTL.geojson', color: '#ba68c8', kind: 'polygon' },
+          { id: 'crz4b11', description: ZONE_INFO.crz4b, name: 'CRZ IVB', url: CRZ11 + '38_zone_CRZ_IVB.geojson', color: '#4fc3f7', kind: 'polygon' },
+          { id: 'crz4a11', description: ZONE_INFO.crz4a, name: 'CRZ IVA', url: CRZ11 + '37_zone_CRZ_IVA.geojson', color: '#0277bd', kind: 'polygon' },
+        ],
+      },
+      { title: 'Hazard analysis', layers: [hazardRiskLayer('hazardrisk11', HZ11_DIR)] },
+    ],
+  },
+  {
+    id: 'crzchg',
+    title: 'CRZ changes · 2011 → 2019',
+    sections: [
+      {
+        title: 'Zones',
+        description:
+          'Blue (grew): land or water inside the zone in the 2019 CZMP but not in the 2011 map, i.e. newly brought under that zone. ' +
+          'Red (reduced): inside the zone in 2011 but not in 2019, i.e. released from it, often into another zone. ' +
+          'Patches under 0.1 ha are dropped; some changes reflect remapping rather than a rule change.',
+        layers: [
+          zoneChangeLayer('crz1a', 'CRZ IA'),
+          zoneChangeLayer('mbuf', '50m Mangrove Buffer · CRZ IA'),
+          zoneChangeLayer('crz2', 'CRZ II'),
+          zoneChangeLayer('ndz', 'No Development Zone'),
+          zoneChangeLayer('crz4b', 'CRZ IVB'),
+          zoneChangeLayer('crz4a', 'CRZ IVA'),
         ],
       },
     ],
@@ -297,17 +381,21 @@ function hazardPopup(p: Record<string, unknown>): string {
 }
 
 // Layers summarised in the hazard stats cards (work/scripts/hazard_dp_split.py). Green belts are excluded.
+// The 2011 hazard line matches 2019 within Mumbai, so the MCGM figures are the same and only 2019 is shown.
 export type HazardStatsDef = { id: 'res' | 'des'; title: string; noun: string; stats: string; url: string; typeField: string; codeField: string; greenBelt: string }
-export const HAZARD_STATS: HazardStatsDef[] = [
-  {
-    id: 'des', title: 'Designations in hazard zone', noun: 'designations', stats: DERIVED + 'mcgm_designations_hazard_stats.json',
-    url: HZ + '47_PLU_DESIGNATION_in.geojson', typeField: 'FINAL_DES_MAINTYPE', codeField: 'FINAL_DES_CODE', greenBelt: 'EOS2.7',
-  },
-  {
-    id: 'res', title: 'Reservations in hazard zone', noun: 'reservations', stats: DERIVED + 'mcgm_reservations_hazard_stats.json',
-    url: HZ + '46_PLU_RESERVATION_in.geojson', typeField: 'FINAL_RES_MAINTYPE', codeField: 'FINAL_RES_CODE', greenBelt: 'ROS2.7',
-  },
-]
+function hazardStats(dir: string): HazardStatsDef[] {
+  return [
+    {
+      id: 'des', title: 'Designations in hazard zone', noun: 'designations', stats: dir + 'mcgm_designations_hazard_stats.json',
+      url: dir + 'mcgm_dp_hazard/47_PLU_DESIGNATION_in.geojson', typeField: 'FINAL_DES_MAINTYPE', codeField: 'FINAL_DES_CODE', greenBelt: 'EOS2.7',
+    },
+    {
+      id: 'res', title: 'Reservations in hazard zone', noun: 'reservations', stats: dir + 'mcgm_reservations_hazard_stats.json',
+      url: dir + 'mcgm_dp_hazard/46_PLU_RESERVATION_in.geojson', typeField: 'FINAL_RES_MAINTYPE', codeField: 'FINAL_RES_CODE', greenBelt: 'ROS2.7',
+    },
+  ]
+}
+export const HAZARD_STATS: HazardStatsDef[] = hazardStats(DERIVED)
 export type Highlight = { layer: HazardStatsDef['id']; type: string }
 
 export function classOf(layer: LayerDef, props: Record<string, unknown> | null): string {

@@ -67,6 +67,17 @@ function PaneOpacity({ pane, opacity }: { pane: string; opacity: number }) {
   return null
 }
 
+// Leaflet only watches the window, so redraw when the side panel is dragged wider or narrower.
+function TrackResize() {
+  const map = useMap()
+  useEffect(() => {
+    const ro = new ResizeObserver(() => map.invalidateSize())
+    ro.observe(map.getContainer())
+    return () => ro.disconnect()
+  }, [map])
+  return null
+}
+
 // Outlines the in-hazard features of one type (picked in a stats card) and zooms to them.
 // Green belts are left out, matching the stats.
 function HazardHighlight({ highlight }: { highlight: Highlight }) {
@@ -115,6 +126,7 @@ type Props = {
 export default function MapView({ layers, loaded, hidden, opacity, highlight }: Props) {
   return (
     <MapContainer center={[19.07, 72.88]} zoom={11} preferCanvas className="map">
+      <TrackResize />
       <TileLayer
         url="https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}"
         attribution="Tiles &copy; Esri &mdash; Source: Esri, Maxar, Earthstar Geographics, and the GIS User Community"
